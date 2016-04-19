@@ -10,6 +10,7 @@ class entry:
     def __init__(self, data):
         self.data = data
 
+        self.spam = self.is_spam()
         if self.is_spam():
             return
 
@@ -20,14 +21,14 @@ class entry:
         self.data['Annual Base Pay'] = self.parse_money(
             self.data['Annual Base Pay'], comment=extra)
 
-        extra = []
-        print self.data
-        print '========'
+        # extra = []
+        # print self.data
+        # print '========'
 
-        print self.data['Signing Bonus']
-        self.data['Signing Bonus'] = self.parse_money(
-            self.data['Signing Bonus'], comment=extra)
-        print self.data['Signing Bonus'], extra
+        # print self.data['Signing Bonus']
+        # self.data['Signing Bonus'] = self.parse_money(
+        #     self.data['Signing Bonus'], comment=extra)
+        # print self.data['Signing Bonus'], extra
 
     def is_spam(self):
         blacklisted_words = (
@@ -36,7 +37,7 @@ class entry:
             'ALLAH HU AKBAR', 'FUCKING ', 'Hang yourself ', 'Your mom',
             'What the fuck did you just fucking say about me, you little bitch?',
             '2\xf0\x9f\x8c\x9d,\xf0\x9f\x8c\x9d\xf0\x9f\x8c\x9d\xf0\x9f\x8c\x9d USD',
-            'Prince Vegeta', 'poopfeast420', 'the nazi party of america', '\xe3\x85\x81'
+            'Prince Vegeta', 'poopfeast420', 'the nazi party of america', '\xe3\x85\x81', 'Niggashitterdick', 'ISuckPen1s', 'Troll'
         )
 
         for key in self.data:
@@ -209,13 +210,22 @@ class entry:
         return str(self.data)
 
 
-data = []
+def to_usd(amount, from_currency):
+    table = {'USD':1, '':1, 'EUR':1.13, 'SEK': .12, 'GBP': 1.43, 'PLN':.26, 'ZAR':.069, 'NOK': .12, 'CAD':.78, 'DKK':.15, 'PKR':0.0095, 'AUD': 0.78, 'NZD': .7, 'BRL': .28, 'HUF': 0.0036, 'RUB': 0.015, 'CHF': 1.04, 'SGD':.74, 'INR': .015, 'JPY': 0.0092 , 'CNY': .15, 'HKD': .13}
+    return table[from_currency]* amount
+
+usd_table =[]
 
 with open('Salaries - Salaries.csv', 'r') as csvfile:
     spamreader = csv.DictReader(csvfile)
     for i, row in enumerate(spamreader):
-        print 'line', i
-        data.append(entry(row))
+        data = entry(row)
+        if not data.spam:
+            pay = data.data['Annual Base Pay']
+            usd =  int(to_usd(( pay[0]+pay[1]) / 2,pay[2]))
+            usd_table.append(usd)
+            if usd > 10**7:
+                print row
+                
 
-
-print data[10]
+# print sorted(usd_table)
